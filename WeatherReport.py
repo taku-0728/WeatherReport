@@ -6,10 +6,15 @@ urlName = "https://tenki.jp/forecast/3/16/4410/13103/1hour.html"
 url = requests.get(urlName)
 soup = bs4(url.content, 'lxml')
 
-hour = soup.find(class_='hour')
-weather = soup.find(class_='weather')
-temperature = soup.find(class_='temperature')
+hours = soup.select_one('tr.hour')
 
-print(hour)
-print(weather)
-print(temperature)
+for hour in hours:
+    # if hour['class'] != 'past':
+    print(hour['class'])
+
+weathers = soup.find(class_='weather')
+temperatures = soup.find(class_='temperature')
+
+# print(hour)
+# print(weather)
+# print(temperature)
