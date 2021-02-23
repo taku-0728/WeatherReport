@@ -7,14 +7,10 @@ url = requests.get(urlName)
 soup = bs4(url.content, 'lxml')
 
 hours = soup.select_one('tr.hour')
+hours = hours.select('span:not(.past)')
 
 for hour in hours:
-    # if hour['class'] != 'past':
-    print(hour['class'])
+    print(hour)
 
 weathers = soup.find(class_='weather')
 temperatures = soup.find(class_='temperature')
-
-# print(hour)
-# print(weather)
-# print(temperature)
