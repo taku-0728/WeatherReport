@@ -9,8 +9,17 @@ soup = bs4(url.content, 'lxml')
 hours = soup.select_one('tr.hour')
 hours = hours.select('span:not(.past)')
 
-for hour in hours:
-    print(hour)
+weathers = soup.select_one('tr.weather')
+weathers = weathers.select('p:not(.past)')
 
-weathers = soup.find(class_='weather')
-temperatures = soup.find(class_='temperature')
+temperatures = soup.select_one('tr.temperature')
+temperatures = temperatures.select('span:not(.past)')
+
+for hour in hours:
+    print(hour.get_text())
+
+for weather in weathers:
+    print(weather.get_text())
+
+for temperature in temperatures:
+    print(temperature.get_text())
