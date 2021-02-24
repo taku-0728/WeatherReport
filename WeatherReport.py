@@ -2,6 +2,12 @@ import requests
 from bs4 import BeautifulSoup as bs4
 import re
 
+print('どこの天気を知りたい？')
+
+place = input('>> ')
+
+print(place)
+
 urlName = "https://tenki.jp/forecast/3/16/4410/13103/1hour.html"
 url = requests.get(urlName)
 soup = bs4(url.content, 'lxml')
