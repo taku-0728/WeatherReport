@@ -1,12 +1,13 @@
 import requests
 from bs4 import BeautifulSoup as bs4
+from selenium import webdriver
 import re
 
 print('どこの天気を知りたい？')
 
 place = input('>> ')
 
-print(place)
+stats = driver.find_element_by_id("resultStats").text
 
 urlName = "https://tenki.jp/forecast/3/16/4410/13103/1hour.html"
 url = requests.get(urlName)
