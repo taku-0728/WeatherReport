@@ -2,31 +2,40 @@ import requests
 from bs4 import BeautifulSoup as bs4
 from selenium import webdriver
 import re
+from selenium.webdriver.chrome.options import Options
+import chromedriver_binary
 
-print('どこの天気を知りたい？')
 
-place = input('>> ')
+# print('どこの天気を知りたい？')
+#
+# place = input('>> ')
 
-stats = driver.find_element_by_id("resultStats").text
+def main():
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('disable-infobars')
+    options.add_argument('--no-sandbox')
 
-urlName = "https://tenki.jp/forecast/3/16/4410/13103/1hour.html"
-url = requests.get(urlName)
-soup = bs4(url.content, 'lxml')
+    driver = webdriver.Chrome(options=options)
+    driver_path = 'https://tenki.jp/forecast/3/16/4410/13103/1hour.html'
+    driver.get('https://google.com')
+    print(driver.title)
+    driver.quit()
 
-hours = soup.select_one('tr.hour')
-hours = hours.select('span:not(.past)')
+    # stats = driver.find_element_by_id("btn").text
 
-weathers = soup.select_one('tr.weather')
-weathers = weathers.select('p:not(.past)')
+    urlName = 'https://tenki.jp/forecast/3/16/4410/13103/1hour.html'
+    url = requests.get(urlName)
+    soup = bs4(url.content, 'lxml')
 
-temperatures = soup.select_one('tr.temperature')
-temperatures = temperatures.select('span:not(.past)')
+    hours = soup.select_one('tr.hour')
+    hours = hours.select('span:not(.past)')
 
-for hour in hours:
-    print(hour.get_text())
+    weathers = soup.select_one('tr.weather')
+    weathers = weathers.select('p:not(.past)')
 
-for weather in weathers:
-    print(weather.get_text())
+    temperatures = soup.select_one('tr.temperature')
+    temperatures = temperatures.select('span:not(.past)')
 
-for temperature in temperatures:
-    print(temperature.get_text())
+if __name__ == '__main__':
+    main()
