@@ -30,27 +30,39 @@ def main():
     btn.click()
     time.sleep(3)
 
-    elements = driver.find_elements_by_class_name('search-entry-data')
+    searchResults = driver.find_elements_by_class_name('search-entry-data')
 
-    for element in elements:
-        print(element.text)
+    searchResults[0].click()
+    time.sleep(3)
+
+    onehour = driver.find_elements_by_class_name('forecast-select-1h')
+    onehour[0].click()
+    time.sleep(3)
+
+    currentUrl = driver.current_url
 
     driver.quit()
 
-    # stats = driver.find_element_by_id("btn").text
+    url = requests.get(currentUrl)
+    soup = bs4(url.content, 'lxml')
 
-    # urlName = 'https://tenki.jp/forecast/3/16/4410/13103/1hour.html'
-    # url = requests.get(urlName)
-    # soup = bs4(url.content, 'lxml')
-    #
-    # hours = soup.select_one('tr.hour')
-    # hours = hours.select('span:not(.past)')
-    #
-    # weathers = soup.select_one('tr.weather')
-    # weathers = weathers.select('p:not(.past)')
-    #
-    # temperatures = soup.select_one('tr.temperature')
-    # temperatures = temperatures.select('span:not(.past)')
+    hours = soup.select_one('tr.hour')
+    hours = hours.select('span:not(.past)')
+
+    weathers = soup.select_one('tr.weather')
+    weathers = weathers.select('p:not(.past)')
+
+    temperatures = soup.select_one('tr.temperature')
+    temperatures = temperatures.select('span:not(.past)')
+
+    for hour in hours:
+        print(hour.get_text())
+
+    for weather in weathers:
+        print(weather.get_text())
+
+    for temperature in temperatures:
+        print(temperature.get_text())
 
 if __name__ == '__main__':
     main()
