@@ -7,24 +7,22 @@ import chromedriver_binary
 import time
 
 
-# print('どこの天気を知りたい？')
-#
-# place = input('>> ')
-
 def main():
+    print('どこの天気を知りたい？')
+
+    place = input('>> ')
+
     options = Options()
     options.add_argument('--headless')
     options.add_argument('disable-infobars')
     options.add_argument('--no-sandbox')
 
     driver = webdriver.Chrome(options=options)
-    driver_path = 'https://tenki.jp/forecast/3/16/4410/13103/1hour.html'
+    driver_path = 'https://tenki.jp/'
     driver.get(driver_path)
 
-    print(driver.title)
-
     element = driver.find_element_by_id("keyword")
-    element.send_keys('新宿区')
+    element.send_keys(place)
 
     btn = driver.find_element_by_id("btn")
     btn.click()
