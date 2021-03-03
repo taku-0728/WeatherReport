@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup as bs4
 from selenium import webdriver
-import re
 from selenium.webdriver.chrome.options import Options
 import chromedriver_binary
 import time
