@@ -7,19 +7,19 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-def main():
-    print('どこの天気を知りたい？')
-
-    place = input('>> ')
-
+def setPlace(text):
     tokenizer = Tokenizer()
-    place2 = ''
+    place = ''
 
-    for token in tokenizer.tokenize(place):
+    # 引数で与えられたテキストを形態素解析し、地域を指定
+    for token in tokenizer.tokenize(text):
         p = token.part_of_speech.split(',')
         if '地域' in p:
-            place2 += token.surface
+            place += token.surface
 
+    return place
+
+def getUrl(place):
     options = Options()
     # ヘッドレスモードを有効にする(無効にすると画面が表示される)
     options.add_argument('--headless')
@@ -31,7 +31,7 @@ def main():
 
     # コンソールから入力された場所をテキストボックスに入力
     element = driver.find_element_by_id("keyword")
-    element.send_keys(place2)
+    element.send_keys(place)
 
     # 検索ボタン押下
     btn = driver.find_element_by_id("btn")
@@ -61,6 +61,19 @@ def main():
 
     # ブラウザの自動操作終了
     driver.quit()
+
+    return currentUrl
+
+def main():
+    print('どこの天気を知りたい？')
+
+    text = input('>> ')
+
+    # 入力されたテキストから場所を取得
+    place = setPlace(text)
+
+    # 場所からスクレイピング対象のページのURLを取得
+    currentUrl = getUrl(place)
 
     # スクレイピング用にURLを指定
     url = requests.get(currentUrl)
