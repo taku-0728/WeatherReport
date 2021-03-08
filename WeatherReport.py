@@ -64,19 +64,9 @@ def getUrl(place):
 
     return currentUrl
 
-def main():
-    print('どこの天気を知りたい？')
-
-    text = input('>> ')
-
-    # 入力されたテキストから場所を取得
-    place = setPlace(text)
-
-    # 場所からスクレイピング対象のページのURLを取得
-    currentUrl = getUrl(place)
-
+def getWeatherReport(url):
     # スクレイピング用にURLを指定
-    url = requests.get(currentUrl)
+    url = requests.get(url)
     soup = bs4(url.content, 'lxml')
 
     # 現在時刻以降の時間を取得
@@ -90,6 +80,22 @@ def main():
     # 現在時刻以降の気温を取得
     temperatures = soup.select_one('tr.temperature')
     temperatures = temperatures.select('span:not(.past)')
+
+    return hours, weathers, temperatures
+
+def main():
+    print('どこの天気を知りたい？')
+
+    text = input('>> ')
+
+    # 入力されたテキストから場所を取得
+    place = setPlace(text)
+
+    # 場所からスクレイピング対象のページのURLを取得
+    currentUrl = getUrl(place)
+
+    # 取得したURLから天気情報を取得
+    hours, weathers, temperatures = getWeatherReport(currentUrl)
 
     for hour in hours:
         print(hour.get_text())
