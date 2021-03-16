@@ -41,18 +41,22 @@ def getLatitude(place):
 
     return lat, lon
 
-# 緯度経度から天気予報を取得
+# 経度緯度から天気予報を取得
 def getWeatherReport(lat, lon):
     APP_ID = '********************************'
     BASE_URL = 'https://map.yahooapis.jp/weather/V1/place?coordinates='
 
-    url = BASE_URL + lat + ',' + lon + '&output=json&appid=' + APP_ID
+    url = BASE_URL + lon + ',' + lat + '&output=json&appid=' + APP_ID
 
     tmp = urllib.request.urlopen(url).read()
 
     json_tree = json.loads(tmp)
 
-    print(json_tree)
+    location = json_tree['Feature'][0]['Name']
+
+    weatherList = json_tree['Feature'][0]['Property']['WeatherList']
+
+    return location, weatherList
 
 def main():
     print('どこの天気を知りたい？')
@@ -64,7 +68,7 @@ def main():
 
     lat, lon = getLatitude(place)
 
-    WeatherReport = getWeatherReport(lat, lon)
+    location, weatherReport = getWeatherReport(lat, lon)
 
 if __name__ == '__main__':
     main()
