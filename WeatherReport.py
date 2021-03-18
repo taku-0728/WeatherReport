@@ -1,12 +1,10 @@
-import chromedriver_binary
 import requests
 import time
 import urllib
 import json
+import datetime
 from bs4 import BeautifulSoup as bs4
 from janome.tokenizer import Tokenizer
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 def setPlace(text):
@@ -52,11 +50,17 @@ def getWeatherReport(lat, lon):
 
     json_tree = json.loads(tmp)
 
-    location = json_tree['Feature'][0]['Name']
+    weatherList = json_tree['Feature'][0]['Property']['WeatherList']['Weather']
 
-    weatherList = json_tree['Feature'][0]['Property']['WeatherList']
+    for weather in weatherList:
+        for key, value in weather.items():
+            if key == 'Date':
+                dt = datetime.datetime.strptime(value, '%Y%m%d%H%M')
+                print(dt.strftime("%Y/%m/%d %H:%M"))
 
-    return location, weatherList
+
+    return weatherList
+
 
 def main():
     print('どこの天気を知りたい？')
@@ -66,9 +70,11 @@ def main():
     # 入力されたテキストから場所を取得
     place = setPlace(text)
 
+    # 天気予報取得のために緯度、経度を取得
     lat, lon = getLatitude(place)
 
-    location, weatherReport = getWeatherReport(lat, lon)
+    # 緯度、経度を用いて天気予報を取得
+    weatherReport = getWeatherReport(lat, lon)
 
 if __name__ == '__main__':
     main()
