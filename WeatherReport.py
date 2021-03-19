@@ -57,11 +57,15 @@ def getWeatherReport(lat, lon):
     weatherList = json_tree['Feature'][0]['Property']['WeatherList']['Weather']
 
     for weather in weatherList:
-        for key, value in weather.items():
-            if key == 'Date':
-                dt = datetime.datetime.strptime(value, '%Y%m%d%H%M')
-                print(dt.strftime("%Y/%m/%d %H:%M"))
+        dt = datetime.datetime.strptime(weather['Date'], '%Y%m%d%H%M')
+        dt = dt.strftime("%Y/%m/%d %H:%M")
 
+        if weather['Rainfall'] == 0.0:
+            print(dt + ': 傘は必要ありません')
+        elif weather['Rainfall'] >= 0.5:
+            print(dt + ': 長時間出かける場合は傘を持っていきましょう')
+        elif weather['Rainfall'] >= 1.0:
+            print(dt + ': 絶対に傘を持って出かけてください')
 
     return weatherList
 
