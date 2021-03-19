@@ -3,8 +3,10 @@ import time
 import urllib
 import json
 import datetime
+import os
 from bs4 import BeautifulSoup as bs4
 from janome.tokenizer import Tokenizer
+from dotenv import load_dotenv
 
 
 def setPlace(text):
@@ -41,10 +43,12 @@ def getLatitude(place):
 
 # 経度緯度から天気予報を取得
 def getWeatherReport(lat, lon):
-    APP_ID = '********************************'
-    BASE_URL = 'https://map.yahooapis.jp/weather/V1/place?coordinates='
+    # 同一ディレクトリから環境変数を取得
+    load_dotenv()
+    baseUrl =  os.environ['BASE_URL']
+    appId = os.environ['APP_ID']
 
-    url = BASE_URL + lon + ',' + lat + '&output=json&appid=' + APP_ID
+    url = baseUrl + lon + ',' + lat + '&output=json&appid=' + appId
 
     tmp = urllib.request.urlopen(url).read()
 
