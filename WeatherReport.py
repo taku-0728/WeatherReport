@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup as bs4
 # from janome.tokenizer import Tokenizer
 import urllib.request, urllib.parse
 
+
 def lambda_handler(request, context):
     for event in json.loads(request['body'])['events']:
 
