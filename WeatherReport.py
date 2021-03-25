@@ -1,88 +1,82 @@
 import requests
 import time
-import urllib
+# import urllib
 import json
 import datetime
 import os
 from bs4 import BeautifulSoup as bs4
-from janome.tokenizer import Tokenizer
-from dotenv import load_dotenv
+# from janome.tokenizer import Tokenizer
+import urllib.request, urllib.parse
 
 
-def setPlace(text):
-    tokenizer = Tokenizer()
-    place = ''
+def lambda_handler(request, context):
+    for event in json.loads(request['body'])['events']:
 
-    # 引数で与えられたテキストを形態素解析し、地域を指定
-    for token in tokenizer.tokenize(text):
-        p = token.part_of_speech.split(',')
-        if '地域' in p:
-            place += token.surface
+        place = event['message']['text']
 
-    return place
+        # tokenizer = Tokenizer()
+        # place = ''
 
-# 場所から緯度経度を取得
-def getLatitude(place):
+        # # 引数で与えられたテキストを形態素解析し、地域を指定
+        # for token in tokenizer.tokenize(text):
+        #     p = token.part_of_speech.split(',')
+        #     if '地域' in p:
+        #         place += token.surface
 
-    url = 'http://www.geocoding.jp/api/?q=' + place
+        placeUrl = 'http://www.geocoding.jp/api/?q=' + place
 
-    # スクレイピング用にURLを指定
-    url = requests.get(url)
-    soup = bs4(url.content, 'lxml')
+        # スクレイピング用にURLを指定
+        url = requests.get(placeUrl)
+        soup = bs4(url.content, 'html.parser')
 
-    if soup.find('error'):
-        return '', ''
+        if soup.find('error'):
+            return '', ''
 
-    lat = soup.find('lat').string
-    lon = soup.find('lng').string
+        lat = soup.find('lat').string
+        lon = soup.find('lng').string
 
-    # 緯度経度取得APIの規定で10秒待つ
-    time.sleep(5)
+        # 緯度経度取得APIの規定で10秒待つ
+        time.sleep(5)
 
-    return lat, lon
+        baseUrl =  os.environ['BASE_URL']
+        appId = os.environ['APP_ID']
 
-# 経度緯度から天気予報を取得
-def getWeatherReport(lat, lon):
-    # 同一ディレクトリから環境変数を取得
-    load_dotenv()
-    baseUrl =  os.environ['BASE_URL']
-    appId = os.environ['APP_ID']
+        url = baseUrl + lon + ',' + lat + '&output=json&appid=' + appId
 
-    url = baseUrl + lon + ',' + lat + '&output=json&appid=' + appId
+        tmp = urllib.request.urlopen(url).read()
 
-    tmp = urllib.request.urlopen(url).read()
+        json_tree = json.loads(tmp)
 
-    json_tree = json.loads(tmp)
+        weatherList = json_tree['Feature'][0]['Property']['WeatherList']['Weather']
 
-    weatherList = json_tree['Feature'][0]['Property']['WeatherList']['Weather']
+        for weather in weatherList:
+            dt = datetime.datetime.strptime(weather['Date'], '%Y%m%d%H%M')
+            dt = dt.strftime("%Y/%m/%d %H:%M")
 
-    for weather in weatherList:
-        dt = datetime.datetime.strptime(weather['Date'], '%Y%m%d%H%M')
-        dt = dt.strftime("%Y/%m/%d %H:%M")
+            if weather['Rainfall'] == 0.0:
+                message = dt + ': 傘は必要ありません'
+            elif weather['Rainfall'] > 0.0 and weather['Rainfall'] < 1.0:
+                message = dt + ': 長時間出かける場合は傘を持っていきましょう'
+            elif weather['Rainfall'] >= 1.0:
+                message = dt + ': 絶対に傘を持って出かけてください'
 
-        if weather['Rainfall'] == 0.0:
-            print(dt + ': 傘は必要ありません')
-        elif weather['Rainfall'] >= 0.5:
-            print(dt + ': 長時間出かける場合は傘を持っていきましょう')
-        elif weather['Rainfall'] >= 1.0:
-            print(dt + ': 絶対に傘を持って出かけてください')
+        url = 'https://api.line.me/v2/bot/message/reply'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + os.environ['ChannelAccessToken']
+        }
+        body = {
+            'replyToken': event['replyToken'],
+            'messages': [
+                {
+                    "type": "text",
+                    "text": message,
+                }
+            ]
+        }
 
-    return weatherList
+        req = urllib.request.Request(url, data=json.dumps(body).encode('utf-8'), method='POST', headers=headers)
+        with urllib.request.urlopen(req) as res:
+            res.read().decode("utf-8")
 
-
-def main():
-    print('どこの天気を知りたい？')
-
-    text = input('>> ')
-
-    # 入力されたテキストから場所を取得
-    place = setPlace(text)
-
-    # 天気予報取得のために緯度、経度を取得
-    lat, lon = getLatitude(place)
-
-    # 緯度、経度を用いて天気予報を取得
-    weatherReport = getWeatherReport(lat, lon)
-
-if __name__ == '__main__':
-    main()
+    return {'statusCode': 200, 'body': '{}'}
